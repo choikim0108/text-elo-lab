@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PixelForge Studio — 2D Normal Maps, Auto Sprite Slicer & Retro SFX Synth</title>
+  <script src="config.js"></script>
+  <style>
+    :root {
+      --bg: #0b0e14;
+      --panel: #131824;
+      --panel-alt: #1a2132;
+      --border: #28324a;
+      --text: #e6edf7;
+      --muted: #8b9bb8;
+      --cyan: #22d3ee;
+      --violet: #a855f7;
+      --amber: #f59e0b;
+      --emerald: #10b981;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background: radial-gradient(circle at top right, #171d30 0%, var(--bg) 60%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: rgba(19, 24, 36, 0.92);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-badge {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--cyan), var(--violet));
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      color: #090d16;
+      font-size: 16px;
+      box-shadow: 0 0 16px rgba(34, 211, 238, 0.35);
+    }
+    .brand h1 {
+      font-size: 17px;
+      letter-spacing: 0.4px;
+      font-weight: 800;
+    }
+    .badge-pill {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(34, 211, 238, 0.14);
+      color: var(--cyan);
+      border: 1px solid rgba(34, 211, 238, 0.35);
+      font-weight: 700;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      background: var(--panel-alt);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 8px 13px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+    .tab-btn:hover { color: var(--text); border-color: #3d4d70; }
+    .tab-btn.active {
+      background: linear-gradient(135deg, rgba(34,211,238,0.18), rgba(168,85,247,0.18));
+      color: #fff;
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(34, 211, 238, 0.18);
+    }
+    .cta-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .btn {
+      background: var(--panel-alt);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.1s ease, border-color 0.15s ease;
+    }
+    .btn:hover { border-color: var(--cyan); transform: translateY(-1px); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--cyan), #0ea5e9);
+      color: #061018;
+      border: none;
+      font-weight: 800;
+    }
+    .btn-pro {
+      background: linear-gradient(135deg, #f59e0b, #ec4899);
+      color: #fff;
+      border: none;
+      font-weight: 800;
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.3);
+    }
+    main {
+      flex: 1;
+      padding: 18px 20px;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .workspace { display: none; grid-template-columns: 330px 1fr; gap: 18px; }
+    .workspace.active { display: grid; }
+    @media (max-width: 920px) {
+      .workspace.active { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .card h2 {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--cyan);
+      margin-bottom: 12px;
+    }
+    .control-row {
+      margin-bottom: 12px;
+    }
+    .control-row label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+    input[type="range"], select {
+      width: 100%;
+      accent-color: var(--cyan);
+    }
+    select, input[type="number"], input[type="color"] {
+      background: var(--panel-alt);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .canvas-stage {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+      align-items: center;
+    }
+    .viewport-box {
+      background: repeating-conic-gradient(#141926 0% 25%, #0e131d 0% 50%) 50% / 20px 20px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      min-height: 300px;
+      justify-content: center;
+      position: relative;
+    }
+    .viewport-label {
+      position: absolute;
+      top: 8px;
+      left: 10px;
+      font-size: 11px;
+      color: var(--muted);
+      background: rgba(11,14,20,0.8);
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    canvas.pixel-canvas {
+      image-rendering: pixelated;
+      max-width: 100%;
+      border-radius: 4px;
+      cursor: crosshair;
+    }
+    .drop-zone {
+      border: 1px dashed #3b4b6e;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      cursor: pointer;
+    }
+    .drop-zone:hover { border-color: var(--cyan); color: var(--text); }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 8, 14, 0.8);
+      display: none;
+      place-items: center;
+      z-index: 99;
+      padding: 16px;
+    }
+    .modal-backdrop.open { display: grid; }
+    .modal {
+      background: var(--panel);
+      border: 1px solid var(--cyan);
+      border-radius: 14px;
+      max-width: 520px;
+      width: 100%;
+      padding: 22px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.65);
+    }
+    .modal h3 { font-size: 20px; margin-bottom: 8px; }
+    .modal ul { margin: 14px 0 18px 18px; color: #cbd5e1; font-size: 14px; line-height: 1.65; }
+    .inline-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .small-note { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo-badge">PF</div>
+      <div>
+        <h1>PIXELFORGE STUDIO <span id="editionBadge" class="badge-pill">WEB EDITION</span></h1>
+      </div>
+    </div>
+
+    <div class="nav-tabs">
+      <button class="tab-btn active" data-tab="normalTab">💡 2D Normal Map Lab</button>
+      <button class="tab-btn" data-tab="slicerTab">✂️ Auto Sprite Slicer</button>
+      <button class="tab-btn" data-tab="sfxTab">🔊 Retro SFX Synth</button>
+      <button class="tab-btn" data-tab="paletteTab">🎨 Outline & Palette FX</button>
+    </div>
+
+    <div class="cta-group" id="ctaGroup">
+      <button class="btn btn-pro" onclick="openProModal()">⚡ Get Pro Mega-Kit + 120 WAVs</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- TAB 1: NORMAL MAP & DYNAMIC 2D LIGHTING -->
+    <section id="normalTab" class="workspace active">
+      <div class="card">
+        <h2>Sprite Input & Normal Settings</h2>
+        <label class="drop-zone" for="normalFileInput">
+          📂 Drop PNG/Sprite Here or Click to Load
+          <input type="file" id="normalFileInput" accept="image/*" style="display:none" />
+        </label>
+
+        <div class="preset-grid">
+          <button class="btn" onclick="loadPresetSprite('sword')">⚔️ Hero Blade</button>
+          <button class="btn" onclick="loadPresetSprite('gem')">💎 Mana Crystal</button>
+          <button class="btn" onclick="loadPresetSprite('shield')">🛡️ Cyber Shield</button>
+          <button class="btn" onclick="loadPresetSprite('potion')">🧪 Crimson Flask</button>
+        </div>
+
+        <div class="control-row">
+          <label><span>Normal Strength</span><span id="lblStrength">3.2</span></label>
+          <input type="range" id="rngStrength" min="0.5" max="10" step="0.1" value="3.2" oninput="updateNormalMap()" />
+        </div>
+        <div class="control-row">
+          <label><span>Bevel Smoothness</span><span id="lblSmooth">1</span></label>
+          <input type="range" id="rngSmooth" min="0" max="4" step="1" value="1" oninput="updateNormalMap()" />
+        </div>
+        <div class="control-row">
+          <label><span>Light Height (Z)</span><span id="lblLightZ">0.38</span></label>
+          <input type="range" id="rngLightZ" min="0.05" max="1.2" step="0.05" value="0.38" oninput="renderLitPreview()" />
+        </div>
+        <div class="control-row">
+          <label><span>Specular Gloss</span><span id="lblSpec">0.45</span></label>
+          <input type="range" id="rngSpec" min="0" max="1.5" step="0.05" value="0.45" oninput="renderLitPreview()" />
+        </div>
+        <div class="control-row inline-row" style="align-items:center; justify-content:space-between;">
+          <span style="font-size:12px; color:var(--muted);">Point Light Color</span>
+          <input type="color" id="clrLight" value="#38bdf8" oninput="renderLitPreview()" />
+          <label style="font-size:12px; color:var(--muted); display:flex; align-items:center; gap:4px;">
+            <input type="checkbox" id="chkOrbit" checked /> Auto-Orbit
+          </label>
+        </div>
+
+        <div class="inline-row" style="margin-top:14px;">
+          <button class="btn btn-primary" onclick="downloadCanvas('normalOutCanvas', 'sprite_normal.png')">⬇ Export _normal.png</button>
+          <button class="btn" onclick="downloadCanvas('litPreviewCanvas', 'sprite_lit_preview.png')">⬇ Lit Preview</button>
+        </div>
+        <p class="small-note">Move cursor over the Lit Preview viewport to inspect real-time 3D Blinn-Phong lighting.</p>
+      </div>
+
+      <div class="card canvas-stage">
+        <div class="viewport-box">
+          <span class="viewport-label">Base Albedo Sprite</span>
+          <canvas id="albedoCanvas" class="pixel-canvas" width="256" height="256"></canvas>
+        </div>
+        <div class="viewport-box">
+          <span class="viewport-label">Generated Tangent Normal Map</span>
+          <canvas id="normalOutCanvas" class="pixel-canvas" width="256" height="256"></canvas>
+        </div>
+        <div class="viewport-box">
+          <span class="viewport-label">Interactive 2D Point-Light Preview</span>
+          <canvas id="litPreviewCanvas" class="pixel-canvas" width="256" height="256"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: SMART SPRITE SLICER -->
+    <section id="slicerTab" class="workspace">
+      <div class="card">
+        <h2>Sprite Sheet Auto-Slicer</h2>
+        <label class="drop-zone" for="sheetFileInput">
+          📂 Load Sprite Sheet PNG (or use Built-in Run Cycle)
+          <input type="file" id="sheetFileInput" accept="image/*" style="display:none" />
+        </label>
+
+        <div class="control-row">
+          <label><span>Detection Mode</span></label>
+          <select id="sliceMode" onchange="runSlicer()">
+            <option value="islands">Auto-Detect Alpha Islands (Flood-Fill)</option>
+            <option value="grid">Uniform Grid (Cols × Rows)</option>
+          </select>
+        </div>
+
+        <div id="gridControls" style="display:none;" class="inline-row control-row">
+          <div style="flex:1;">
+            <label><span>Columns</span></label>
+            <input type="number" id="gridCols" value="6" min="1" max="64" onchange="runSlicer()" style="width:100%;" />
+          </div>
+          <div style="flex:1;">
+            <label><span>Rows</span></label>
+            <input type="number" id="gridRows" value="1" min="1" max="64" onchange="runSlicer()" style="width:100%;" />
+          </div>
+        </div>
+
+        <div class="control-row">
+          <label><span>Animation Preview FPS</span><span id="lblFps">10 FPS</span></label>
+          <input type="range" id="rngFps" min="1" max="30" value="10" oninput="document.getElementById('lblFps').textContent=this.value+' FPS'" />
+        </div>
+
+        <div class="control-row">
+          <label><span>Detected Frames</span><span id="lblFrameCount" style="color:var(--emerald); font-weight:700;">6 frames</span></label>
+        </div>
+
+        <div class="inline-row" style="margin-top:10px;">
+          <button class="btn btn-primary" onclick="exportAtlasJson('godot4')">⬇ Godot 4 Atlas JSON</button>
+          <button class="btn" onclick="exportAtlasJson('unity')">⬇ Unity JSON</button>
+          <button class="btn" onclick="exportAtlasJson('phaser3')">⬇ Phaser 3 JSON</button>
+        </div>
+      </div>
+
+      <div class="card canvas-stage">
+        <div class="viewport-box" style="grid-column: span 2;">
+          <span class="viewport-label">Detected Bounding Boxes</span>
+          <canvas id="sheetOverlayCanvas" class="pixel-canvas" width="480" height="140"></canvas>
+        </div>
+        <div class="viewport-box">
+          <span class="viewport-label">Live Animation Playback</span>
+          <canvas id="animPreviewCanvas" class="pixel-canvas" width="192" height="192"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: RETRO SFX SYNTH -->
+    <section id="sfxTab" class="workspace">
+      <div class="card">
+        <h2>Procedural Game SFX Synth</h2>
+        <div class="preset-grid">
+          <button class="btn" onclick="sfxPreset('coin')">🪙 Coin Pickup</button>
+          <button class="btn" onclick="sfxPreset('jump')">🦘 Hero Jump</button>
+          <button class="btn" onclick="sfxPreset('laser')">🔫 Plasma Laser</button>
+          <button class="btn" onclick="sfxPreset('explosion')">💥 Boom Impact</button>
+          <button class="btn" onclick="sfxPreset('powerup')">⭐ Power-Up</button>
+          <button class="btn" onclick="sfxPreset('hit')">🩸 Damage Hit</button>
+          <button class="btn" onclick="sfxMutate()">🧬 Mutate</button>
+          <button class="btn" onclick="sfxRandom()">🎲 Randomize</button>
+        </div>
+
+        <div class="control-row">
+          <label><span>Waveform</span></label>
+          <select id="sfxWave" onchange="playAndRenderSfx()">
+            <option value="square">Square (NES / Chiptune)</option>
+            <option value="saw">Sawtooth (Punchy Lead)</option>
+            <option value="tri">Triangle (Warm Bass/UI)</option>
+            <option value="noise">Retro Noise (Explosion/Hit)</option>
+          </select>
+        </div>
+        <div class="control-row">
+          <label><span>Start Frequency (Hz)</span><span id="lblSfxStart">660</span></label>
+          <input type="range" id="sfxStart" min="60" max="2200" value="660" oninput="syncSfxLabels(); playAndRenderSfx()" />
+        </div>
+        <div class="control-row">
+          <label><span>End Frequency (Hz)</span><span id="lblSfxEnd">990</span></label>
+          <input type="range" id="sfxEnd" min="40" max="2400" value="990" oninput="syncSfxLabels(); playAndRenderSfx()" />
+        </div>
+        <div class="control-row">
+          <label><span>Duration (sec)</span><span id="lblSfxDur">0.24s</span></label>
+          <input type="range" id="sfxDur" min="0.05" max="0.9" step="0.02" value="0.24" oninput="syncSfxLabels(); playAndRenderSfx()" />
+        </div>
+        <div class="control-row">
+          <label><span>FM Vibrato / Mod</span><span id="lblSfxFm">0</span></label>
+          <input type="range" id="sfxFm" min="0" max="150" value="0" oninput="syncSfxLabels(); playAndRenderSfx()" />
+        </div>
+
+        <div class="inline-row" style="margin-top:14px;">
+          <button class="btn btn-primary" onclick="playAndRenderSfx()">▶ Play Sound</button>
+          <button class="btn" onclick="exportCurrentWav()">⬇ Download 16-bit .WAV</button>
+        </div>
+      </div>
+
+      <div class="card" style="display:flex; flex-direction:column; justify-content:center; gap:16px;">
+        <div class="viewport-box" style="min-height:260px;">
+          <span class="viewport-label">44.1kHz PCM Waveform Oscilloscope</span>
+          <canvas id="sfxScopeCanvas" width="680" height="220" style="max-width:100%;"></canvas>
+        </div>
+        <div class="card" style="background:var(--panel-alt); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+          <div>
+            <strong style="color:var(--amber);">Want 120 Ready-to-Use Commercial WAVs + Godot/Unity 2D Shaders?</strong>
+            <p class="small-note">Grab the PixelForge Pro Mega-Kit for instant drag-and-drop folders (Coins, Jumps, Lasers, Explosions, Hits, UI, Synths + 6 Shaders).</p>
+          </div>
+          <button class="btn btn-pro" onclick="openProModal()">Unlock Mega-Kit →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: PALETTE & OUTLINE BAKER -->
+    <section id="paletteTab" class="workspace">
+      <div class="card">
+        <h2>Pixel Outline & Palette Baker</h2>
+        <div class="control-row">
+          <label><span>Color Palette Remap</span></label>
+          <select id="palSelect" onchange="renderPaletteFx()">
+            <option value="none">Original Colors</option>
+            <option value="pico8">PICO-8 (16 Colors)</option>
+            <option value="dmg">GameBoy Classic DMG (4 Colors)</option>
+            <option value="cyber">Cyberpunk Neon (8 Colors)</option>
+            <option value="ember">Dungeon Ember (8 Colors)</option>
+          </select>
+        </div>
+        <div class="control-row inline-row" style="align-items:center; justify-content:space-between;">
+          <label style="font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px;">
+            <input type="checkbox" id="chkOutline" checked onchange="renderPaletteFx()" /> Bake 1px Pixel Outline
+          </label>
+          <input type="color" id="clrOutline" value="#22d3ee" oninput="renderPaletteFx()" />
+        </div>
+        <div class="inline-row" style="margin-top:16px;">
+          <button class="btn btn-primary" onclick="downloadCanvas('paletteOutCanvas', 'sprite_stylized.png')">⬇ Export Stylized PNG</button>
+        </div>
+      </div>
+
+      <div class="card canvas-stage">
+        <div class="viewport-box">
+          <span class="viewport-label">Stylized Pixel Output</span>
+          <canvas id="paletteOutCanvas" class="pixel-canvas" width="256" height="256"></canvas>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- PRO / MONETIZATION MODAL -->
+  <div class="modal-backdrop" id="proModal" onclick="if(event.target===this) closeProModal()">
+    <div class="modal">
+      <h3>⚡ PixelForge Pro Mega-Kit</h3>
+      <p style="color:var(--muted); font-size:14px;">Ship faster in Godot 4, Unity, Unreal & Phaser with the complete offline commercial bundle:</p>
+      <ul>
+        <li><strong>120 Royalty-Free 44.1kHz 16-bit WAV SFX</strong> across 8 organized game folders</li>
+        <li><strong>6 Commercial 2D Shaders</strong> for Godot 4 (<code>.gdshader</code>) & Unity (Hit Flash, 8-Dir Pixel Outline, Ember Dissolve, CRT Scanline)</li>
+        <li><strong>Offline Standalone PixelForge Studio</strong> (Zero internet required, CC0 commercial license)</li>
+      </ul>
+      <div class="inline-row">
+        <a id="lnkItch" href="#" target="_blank" rel="noopener" class="btn btn-pro">🎮 Get on Itch.io</a>
+        <a id="lnkGumroad" href="#" target="_blank" rel="noopener" class="btn btn-primary">📦 Get on Gumroad</a>
+        <a id="lnkPaypal" href="#" target="_blank" rel="noopener" class="btn">☕ Tip $1+ via PayPal</a>
+        <button class="btn" onclick="closeProModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CFG = window.PIXELFORGE_CONFIG || {};
+    if (CFG.isProUnlocked) {
+      document.getElementById('editionBadge').textContent = 'PRO MEGA-KIT';
+      document.getElementById('ctaGroup').style.display = 'none';
+    }
+    document.getElementById('lnkItch').href = CFG.itchUrl || 'https://itch.io';
+    document.getElementById('lnkGumroad').href = CFG.gumroadUrl || 'https://gumroad.com';
+    document.getElementById('lnkPaypal').href = CFG.paypalMeUrl || 'https://paypal.com';
+
+    function openProModal() { document.getElementById('proModal').classList.add('open'); }
+    function closeProModal() { document.getElementById('proModal').classList.remove('open'); }
+
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.workspace').forEach(w => w.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Offscreen 32x32 sprite source for crisp pixel scaling
+    const srcCanvas = document.createElement('canvas');
+    srcCanvas.width = 32; srcCanvas.height = 32;
+    const srcCtx = srcCanvas.getContext('2d', { willReadFrequently: true });
+
+    const normRawCanvas = document.createElement('canvas');
+    normRawCanvas.width = 32; normRawCanvas.height = 32;
+    const normRawCtx = normRawCanvas.getContext('2d', { willReadFrequently: true });
+
+    let lightPos = { x: 0.7, y: 0.3 };
+    let orbitAngle = 0;
+
+    function loadPresetSprite(kind) {
+      srcCanvas.width = 32; srcCanvas.height = 32;
+      srcCtx.clearRect(0, 0, 32, 32);
+      const px = (x, y, c) => { srcCtx.fillStyle = c; srcCtx.fillRect(x, y, 1, 1); };
+      if (kind === 'sword') {
+        for (let i = 0; i < 18; i++) {
+          px(8 + i, 23 - i, '#e2e8f0');
+          px(9 + i, 23 - i, '#94a3b8');
+          px(8 + i, 22 - i, '#f8fafc');
+        }
+        for (let g = -3; g <= 3; g++) px(10 + g, 21 + g, '#f59e0b');
+        px(7, 24, '#78350f'); px(6, 25, '#78350f'); px(5, 26, '#fbbf24');
+      } else if (kind === 'gem') {
+        for (let y = 6; y <= 25; y++) {
+          const half = y < 14 ? (y - 5) : Math.max(1, Math.floor((26 - y) * 0.8));
+          for (let x = 16 - half; x <= 16 + half; x++) {
+            const shade = x < 16 ? '#38bdf8' : (y < 14 ? '#7dd3fc' : '#0284c7');
+            px(x, y, shade);
+          }
+        }
+        px(13, 10, '#ffffff'); px(14, 11, '#ffffff');
+      } else if (kind === 'shield') {
+        for (let y = 5; y <= 26; y++) {
+          const w = y < 16 ? 10 : Math.max(1, Math.floor((27 - y) * 0.9));
+          for (let x = 16 - w; x <= 16 + w; x++) {
+            const border = (x === 16 - w || x === 16 + w || y === 5);
+            px(x, y, border ? '#22d3ee' : (x < 16 ? '#334155' : '#1e293b'));
+          }
+        }
+        for (let y = 10; y <= 20; y++) px(16, y, '#a855f7');
+        for (let x = 12; x <= 20; x++) px(x, 14, '#a855f7');
+      } else {
+        for (let x = 13; x <= 18; x++) { px(x, 6, '#d97706'); px(x, 7, '#94a3b8'); px(x, 8, '#94a3b8'); }
+        for (let y = 9; y <= 25; y++) {
+          const r = y < 14 ? (y - 7) : 9;
+          for (let x = 16 - r; x <= 16 + r; x++) {
+            if ((x - 16)*(x - 16) + (y - 18)*(y - 18) <= 68) {
+              px(x, y, y > 13 ? (x < 15 ? '#f43f5e' : '#be123c') : '#cbd5e1');
+            }
+          }
+        }
+        px(12, 16, '#fecdd3'); px(12, 17, '#ffffff');
+      }
+      syncAllSpriteViews();
+    }
+
+    document.getElementById('normalFileInput').addEventListener('change', e => {
+      const f = e.target.files[0];
+      if (!f) return;
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = Math.min(128, Math.max(img.width, img.height));
+        const scale = maxDim / Math.max(img.width, img.height);
+        srcCanvas.width = Math.max(1, Math.round(img.width * scale));
+        srcCanvas.height = Math.max(1, Math.round(img.height * scale));
+        normRawCanvas.width = srcCanvas.width;
+        normRawCanvas.height = srcCanvas.height;
+        srcCtx.clearRect(0, 0, srcCanvas.width, srcCanvas.height);
+        srcCtx.drawImage(img, 0, 0, srcCanvas.width, srcCanvas.height);
+        syncAllSpriteViews();
+      };
+      img.src = URL.createObjectURL(f);
+    });
+
+    function syncAllSpriteViews() {
+      const alb = document.getElementById('albedoCanvas');
+      const actx = alb.getContext('2d');
+      actx.imageSmoothingEnabled = false;
+      actx.clearRect(0, 0, alb.width, alb.height);
+      actx.drawImage(srcCanvas, 0, 0, alb.width, alb.height);
+      updateNormalMap();
+      renderPaletteFx();
+    }
+
+    function updateNormalMap() {
+      const w = srcCanvas.width, h = srcCanvas.height;
+      normRawCanvas.width = w; normRawCanvas.height = h;
+      const strength = parseFloat(document.getElementById('rngStrength').value);
+      const smooth = parseInt(document.getElementById('rngSmooth').value, 10);
+      document.getElementById('lblStrength').textContent = strength.toFixed(1);
+      document.getElementById('lblSmooth').textContent = smooth;
+
+      const src = srcCtx.getImageData(0, 0, w, h).data;
+      let heights = new Float32Array(w * h);
+      for (let i = 0; i < w * h; i++) {
+        const a = src[i * 4 + 3] / 255;
+        const lum = (0.299 * src[i * 4] + 0.587 * src[i * 4 + 1] + 0.114 * src[i * 4 + 2]) / 255;
+        heights[i] = a > 0.05 ? (0.35 + 0.65 * lum) * a : 0.0;
+      }
+
+      for (let pass = 0; pass < smooth; pass++) {
+        const next = new Float32Array(w * h);
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w; x++) {
+            let sum = 0, cnt = 0;
+            for (let dy = -1; dy <= 1; dy++) {
+              for (let dx = -1; dx <= 1; dx++) {
+                const nx = Math.min(w - 1, Math.max(0, x + dx));
+                const ny = Math.min(h - 1, Math.max(0, y + dy));
+                sum += heights[ny * w + nx]; cnt++;
+              }
+            }
+            next[y * w + x] = sum / cnt;
+          }
+        }
+        heights = next;
+      }
+
+      const outImg = normRawCtx.createImageData(w, h);
+      const H = (x, y) => heights[Math.min(h - 1, Math.max(0, y)) * w + Math.min(w - 1, Math.max(0, x))];
+
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const idx = (y * w + x) * 4;
+          if (src[idx + 3] < 10) {
+            outImg.data[idx] = 128; outImg.data[idx + 1] = 128; outImg.data[idx + 2] = 255; outImg.data[idx + 3] = 0;
+            continue;
+          }
+          const dx = (H(x - 1, y - 1) + 2 * H(x - 1, y) + H(x - 1, y + 1)) - (H(x + 1, y - 1) + 2 * H(x + 1, y) + H(x + 1, y + 1));
+          const dy = (H(x - 1, y - 1) + 2 * H(x, y - 1) + H(x + 1, y - 1)) - (H(x - 1, y + 1) + 2 * H(x, y + 1) + H(x + 1, y + 1));
+          let nx = dx * strength, ny = dy * strength, nz = 1.0;
+          const len = Math.hypot(nx, ny, nz) || 1;
+          nx /= len; ny /= len; nz /= len;
+          outImg.data[idx] = Math.round((nx * 0.5 + 0.5) * 255);
+          outImg.data[idx + 1] = Math.round((ny * 0.5 + 0.5) * 255);
+          outImg.data[idx + 2] = Math.round((nz * 0.5 + 0.5) * 255);
+          outImg.data[idx + 3] = src[idx + 3];
+        }
+      }
+      normRawCtx.putImageData(outImg, 0, 0);
+
+      const nOut = document.getElementById('normalOutCanvas');
+      const nctx = nOut.getContext('2d');
+      nctx.imageSmoothingEnabled = false;
+      nctx.clearRect(0, 0, nOut.width, nOut.height);
+      nctx.drawImage(normRawCanvas, 0, 0, nOut.width, nOut.height);
+      renderLitPreview();
+    }
+
+    function hexToRgb(hex) {
+      const n = parseInt(hex.slice(1), 16);
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    }
+
+    function renderLitPreview() {
+      const w = srcCanvas.width, h = srcCanvas.height;
+      const alb = srcCtx.getImageData(0, 0, w, h).data;
+      const nrm = normRawCtx.getImageData(0, 0, w, h).data;
+      const lz = parseFloat(document.getElementById('rngLightZ').value);
+      const specAmt = parseFloat(document.getElementById('rngSpec').value);
+      document.getElementById('lblLightZ').textContent = lz.toFixed(2);
+      document.getElementById('lblSpec').textContent = specAmt.toFixed(2);
+      const [lr, lg, lb] = hexToRgb(document.getElementById('clrLight').value);
+
+      const temp = document.createElement('canvas');
+      temp.width = w; temp.height = h;
+      const tctx = temp.getContext('2d');
+      const img = tctx.createImageData(w, h);
+
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const i = (y * w + x) * 4;
+          if (alb[i + 3] < 10) continue;
+          const nx = (nrm[i] / 255) * 2 - 1;
+          const ny = (nrm[i + 1] / 255) * 2 - 1;
+          const nz = (nrm[i + 2] / 255) * 2 - 1;
+
+          let lx = lightPos.x - (x / w);
+          let ly = lightPos.y - (y / h);
+          const dist = Math.hypot(lx, ly, lz) || 1;
+          lx /= dist; ly /= dist; const lzn = lz / dist;
+
+          const diff = Math.max(0, nx * lx + ny * ly + nz * lzn);
+          const hx = lx, hy = ly, hz = lzn + 1.0;
+          const hlen = Math.hypot(hx, hy, hz) || 1;
+          const spec = Math.pow(Math.max(0, (nx * hx + ny * hy + nz * hz) / hlen), 20) * specAmt;
+
+          const atten = 1.0 / (0.45 + dist * dist * 1.6);
+          img.data[i] = Math.min(255, alb[i] * 0.22 + alb[i] * diff * (lr / 255) * 1.6 * atten + spec * lr);
+          img.data[i + 1] = Math.min(255, alb[i + 1] * 0.22 + alb[i + 1] * diff * (lg / 255) * 1.6 * atten + spec * lg);
+          img.data[i + 2] = Math.min(255, alb[i + 2] * 0.26 + alb[i + 2] * diff * (lb / 255) * 1.6 * atten + spec * lb);
+          img.data[i + 3] = alb[i + 3];
+        }
+      }
+      tctx.putImageData(img, 0, 0);
+
+      const litC = document.getElementById('litPreviewCanvas');
+      const lctx = litC.getContext('2d');
+      lctx.imageSmoothingEnabled = false;
+      lctx.clearRect(0, 0, litC.width, litC.height);
+      lctx.drawImage(temp, 0, 0, litC.width, litC.height);
+
+      // Draw light gizmo
+      lctx.fillStyle = document.getElementById('clrLight').value;
+      lctx.beginPath();
+      lctx.arc(lightPos.x * litC.width, lightPos.y * litC.height, 5, 0, Math.PI * 2);
+      lctx.fill();
+    }
+
+    document.getElementById('litPreviewCanvas').addEventListener('mousemove', e => {
+      document.getElementById('chkOrbit').checked = false;
+      const r = e.target.getBoundingClientRect();
+      lightPos.x = (e.clientX - r.left) / r.width;
+      lightPos.y = (e.clientY - r.top) / r.height;
+      renderLitPreview();
+    });
+
+    // TAB 2: SPRITE SHEET SLICER
+    const sheetSrc = document.createElement('canvas');
+    sheetSrc.width = 192; sheetSrc.height = 32;
+    const sheetCtx = sheetSrc.getContext('2d', { willReadFrequently: true });
+    let detectedRects = [];
+    let animFrameIdx = 0;
+
+    function buildDemoSpriteSheet() {
+      sheetSrc.width = 192; sheetSrc.height = 32;
+      sheetCtx.clearRect(0, 0, 192, 32);
+      for (let f = 0; f < 6; f++) {
+        const ox = f * 32;
+        const bob = (f % 2 === 0) ? 0 : -2;
+        sheetCtx.fillStyle = '#38bdf8';
+        sheetCtx.fillRect(ox + 11, 6 + bob, 10, 9); // helmet
+        sheetCtx.fillStyle = '#0f172a';
+        sheetCtx.fillRect(ox + 16, 9 + bob, 4, 2); // visor
+        sheetCtx.fillStyle = '#a855f7';
+        sheetCtx.fillRect(ox + 10, 15 + bob, 12, 9); // armor
+        const swing = Math.sin((f / 6) * Math.PI * 2) * 4;
+        sheetCtx.fillStyle = '#f59e0b';
+        sheetCtx.fillRect(Math.round(ox + 11 + swing), 24, 4, 6);
+        sheetCtx.fillRect(Math.round(ox + 17 - swing), 24, 4, 6);
+      }
+      runSlicer();
+    }
+
+    document.getElementById('sheetFileInput').addEventListener('change', e => {
+      const f = e.target.files[0];
+      if (!f) return;
+      const img = new Image();
+      img.onload = () => {
+        sheetSrc.width = img.width; sheetSrc.height = img.height;
+        sheetCtx.clearRect(0, 0, img.width, img.height);
+        sheetCtx.drawImage(img, 0, 0);
+        runSlicer();
+      };
+      img.src = URL.createObjectURL(f);
+    });
+
+    function runSlicer() {
+      const mode = document.getElementById('sliceMode').value;
+      document.getElementById('gridControls').style.display = mode === 'grid' ? 'flex' : 'none';
+      const w = sheetSrc.width, h = sheetSrc.height;
+      detectedRects = [];
+
+      if (mode === 'grid') {
+        const cols = Math.max(1, parseInt(document.getElementById('gridCols').value, 10) || 1);
+        const rows = Math.max(1, parseInt(document.getElementById('gridRows').value, 10) || 1);
+        const cw = Math.floor(w / cols), ch = Math.floor(h / rows);
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            detectedRects.push({ x: c * cw, y: r * ch, w: cw, h: ch });
+          }
+        }
+      } else {
+        const data = sheetCtx.getImageData(0, 0, w, h).data;
+        const visited = new Uint8Array(w * h);
+        for (let x = 0; x < w; x++) {
+          for (let y = 0; y < h; y++) {
+            const p = y * w + x;
+            if (visited[p] || data[p * 4 + 3] < 16) continue;
+            let minX = x, maxX = x, minY = y, maxY = y;
+            const q = [p];
+            visited[p] = 1;
+            while (q.length) {
+              const cur = q.pop();
+              const cx = cur % w, cy = (cur / w) | 0;
+              if (cx < minX) minX = cx; if (cx > maxX) maxX = cx;
+              if (cy < minY) minY = cy; if (cy > maxY) maxY = cy;
+              for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                  const nx = cx + dx, ny = cy + dy;
+                  if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+                    const np = ny * w + nx;
+                    if (!visited[np] && data[np * 4 + 3] >= 16) {
+                      visited[np] = 1;
+                      q.push(np);
+                    }
+                  }
+                }
+              }
+            }
+            if ((maxX - minX + 1) >= 2 && (maxY - minY + 1) >= 2) {
+              detectedRects.push({ x: minX, y: minY, w: maxX - minX + 1, h: maxY - minY + 1 });
+            }
+          }
+        }
+      }
+
+      document.getElementById('lblFrameCount').textContent = detectedRects.length + ' frames';
+      const ov = document.getElementById('sheetOverlayCanvas');
+      const scale = Math.min(520 / w, 220 / h, 4);
+      ov.width = Math.max(1, Math.round(w * scale));
+      ov.height = Math.max(1, Math.round(h * scale));
+      const octx = ov.getContext('2d');
+      octx.imageSmoothingEnabled = false;
+      octx.clearRect(0, 0, ov.width, ov.height);
+      octx.drawImage(sheetSrc, 0, 0, ov.width, ov.height);
+      octx.strokeStyle = '#22d3ee';
+      octx.lineWidth = 1.5;
+      detectedRects.forEach(r => {
+        octx.strokeRect(r.x * scale, r.y * scale, r.w * scale, r.h * scale);
+      });
+    }
+
+    function exportAtlasJson(engine) {
+      let payload = {};
+      if (engine === 'godot4') {
+        payload = { format: "godot4_atlas_frames", frames: detectedRects.map((r, i) => ({ name: `frame_${i}`, region: r })) };
+      } else if (engine === 'unity') {
+        payload = { textureImporter: { sprites: detectedRects.map((r, i) => ({ name: `sprite_${i}`, rect: r, pivot: { x: 0.5, y: 0.5 } })) } };
+      } else {
+        const frames = {};
+        detectedRects.forEach((r, i) => { frames[`frame_${i}.png`] = { frame: r, rotated: false, trimmed: true }; });
+        payload = { frames, meta: { app: "PixelForge Studio", version: "1.0" } };
+      }
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `atlas_${engine}.json`;
+      a.click();
+    }
+
+    // TAB 3: RETRO SFX SYNTH
+    let lastPcmFloat = new Float32Array(4410);
+    let audioCtx = null;
+
+    function syncSfxLabels() {
+      document.getElementById('lblSfxStart').textContent = document.getElementById('sfxStart').value;
+      document.getElementById('lblSfxEnd').textContent = document.getElementById('sfxEnd').value;
+      document.getElementById('lblSfxDur').textContent = parseFloat(document.getElementById('sfxDur').value).toFixed(2) + 's';
+      document.getElementById('lblSfxFm').textContent = document.getElementById('sfxFm').value;
+    }
+
+    function generateSfxBuffer() {
+      const sr = 44100;
+      const wave = document.getElementById('sfxWave').value;
+      const f0 = parseFloat(document.getElementById('sfxStart').value);
+      const f1 = parseFloat(document.getElementById('sfxEnd').value);
+      const dur = parseFloat(document.getElementById('sfxDur').value);
+      const fm = parseFloat(document.getElementById('sfxFm').value);
+      const len = Math.floor(sr * dur);
+      const buf = new Float32Array(len);
+      let phase = 0, heldNoise = 0;
+
+      for (let i = 0; i < len; i++) {
+        const prog = i / len;
+        let freq = f0 + (f1 - f0) * prog;
+        if (fm > 0) freq += Math.sin(2 * Math.PI * 28 * (i / sr)) * fm;
+        phase += Math.max(30, freq) / sr;
+        const p = phase % 1.0;
+        let s = 0;
+        if (wave === 'square') s = p < 0.5 ? 1 : -1;
+        else if (wave === 'saw') s = 2 * p - 1;
+        else if (wave === 'tri') s = 1 - 4 * Math.abs(p - 0.5);
+        else { if (i % 6 === 0) heldNoise = Math.random() * 2 - 1; s = heldNoise; }
+        const env = (i < 180 ? i / 180 : Math.pow(1 - prog, 1.35));
+        buf[i] = s * env * 0.75;
+      }
+      lastPcmFloat = buf;
+      drawScope(buf);
+      return buf;
+    }
+
+    function drawScope(buf) {
+      const c = document.getElementById('sfxScopeCanvas');
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#090d16';
+      ctx.fillRect(0, 0, c.width, c.height);
+      ctx.strokeStyle = '#22d3ee';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      const step = Math.max(1, Math.floor(buf.length / c.width));
+      for (let x = 0; x < c.width; x++) {
+        const y = (0.5 - buf[Math.min(buf.length - 1, x * step)] * 0.45) * c.height;
+        if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    function playAndRenderSfx() {
+      const buf = generateSfxBuffer();
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const ab = audioCtx.createBuffer(1, buf.length, 44100);
+      ab.getChannelData(0).set(buf);
+      const src = audioCtx.createBufferSource();
+      src.buffer = ab;
+      src.connect(audioCtx.destination);
+      src.start();
+    }
+
+    function sfxPreset(p) {
+      const map = {
+        coin: ['square', 660, 1320, 0.24, 0],
+        jump: ['square', 210, 680, 0.22, 0],
+        laser: ['saw', 1280, 140, 0.19, 35],
+        explosion: ['noise', 240, 50, 0.52, 0],
+        powerup: ['tri', 360, 1120, 0.46, 28],
+        hit: ['noise', 380, 90, 0.16, 0]
+      }[p];
+      document.getElementById('sfxWave').value = map[0];
+      document.getElementById('sfxStart').value = map[1];
+      document.getElementById('sfxEnd').value = map[2];
+      document.getElementById('sfxDur').value = map[3];
+      document.getElementById('sfxFm').value = map[4];
+      syncSfxLabels();
+      playAndRenderSfx();
+    }
+
+    function sfxMutate() {
+      const jitter = v => Math.max(50, Math.min(2200, Math.round(v * (0.85 + Math.random() * 0.3))));
+      document.getElementById('sfxStart').value = jitter(document.getElementById('sfxStart').value);
+      document.getElementById('sfxEnd').value = jitter(document.getElementById('sfxEnd').value);
+      syncSfxLabels();
+      playAndRenderSfx();
+    }
+
+    function sfxRandom() {
+      const waves = ['square', 'saw', 'tri', 'noise'];
+      document.getElementById('sfxWave').value = waves[(Math.random() * waves.length) | 0];
+      document.getElementById('sfxStart').value = Math.round(100 + Math.random() * 1600);
+      document.getElementById('sfxEnd').value = Math.round(60 + Math.random() * 1800);
+      document.getElementById('sfxDur').value = (0.08 + Math.random() * 0.55).toFixed(2);
+      document.getElementById('sfxFm').value = Math.round(Math.random() * 90);
+      syncSfxLabels();
+      playAndRenderSfx();
+    }
+
+    function exportCurrentWav() {
+      const samples = lastPcmFloat;
+      const buffer = new ArrayBuffer(44 + samples.length * 2);
+      const view = new DataView(buffer);
+      const writeStr = (off, s) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
+      writeStr(0, 'RIFF');
+      view.setUint32(4, 36 + samples.length * 2, true);
+      writeStr(8, 'WAVE');
+      writeStr(12, 'fmt ');
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, 1, true);
+      view.setUint32(24, 44100, true);
+      view.setUint32(28, 88200, true);
+      view.setUint16(32, 2, true);
+      view.setUint16(34, 16, true);
+      writeStr(36, 'data');
+      view.setUint32(40, samples.length * 2, true);
+      for (let i = 0; i < samples.length; i++) {
+        const s = Math.max(-1, Math.min(1, samples[i]));
+        view.setInt16(44 + i * 2, s * 32767, true);
+      }
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([buffer], { type: 'audio/wav' }));
+      a.download = 'pixelforge_sfx.wav';
+      a.click();
+    }
+
+    // TAB 4: PALETTE & OUTLINE BAKER
+    const PALETTES = {
+      pico8: [[0,0,0],[29,43,83],[126,37,83],[0,135,81],[171,82,54],[95,87,79],[194,195,199],[255,241,232],[255,0,77],[255,163,0],[255,236,39],[0,228,54],[41,173,255],[131,118,156],[255,119,168],[255,204,170]],
+      dmg: [[15,56,15],[48,98,48],[139,172,15],[155,188,15]],
+      cyber: [[11,14,20],[30,27,75],[88,28,135],[192,38,211],[34,211,238],[56,189,248],[250,204,21],[248,250,252]],
+      ember: [[18,10,14],[59,18,25],[127,29,29],[185,28,28],[234,88,12],[245,158,11],[253,224,71],[255,251,235]]
+    };
+
+    function renderPaletteFx() {
+      const w = srcCanvas.width, h = srcCanvas.height;
+      const src = srcCtx.getImageData(0, 0, w, h).data;
+      const temp = document.createElement('canvas');
+      temp.width = w; temp.height = h;
+      const tctx = temp.getContext('2d');
+      const out = tctx.createImageData(w, h);
+      const pal = PALETTES[document.getElementById('palSelect').value] || null;
+      const doOutline = document.getElementById('chkOutline').checked;
+      const [or, og, ob] = hexToRgb(document.getElementById('clrOutline').value);
+
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const i = (y * w + x) * 4;
+          if (src[i + 3] >= 20) {
+            let r = src[i], g = src[i + 1], b = src[i + 2];
+            if (pal) {
+              let best = pal[0], bestD = 1e9;
+              for (const c of pal) {
+                const d = (r - c[0]) ** 2 + (g - c[1]) ** 2 + (b - c[2]) ** 2;
+                if (d < bestD) { bestD = d; best = c; }
+              }
+              [r, g, b] = best;
+            }
+            out.data[i] = r; out.data[i + 1] = g; out.data[i + 2] = b; out.data[i + 3] = src[i + 3];
+          } else if (doOutline) {
+            const hasNeighbor = [[1,0],[-1,0],[0,1],[0,-1]].some(([dx, dy]) => {
+              const nx = x + dx, ny = y + dy;
+              return nx >= 0 && nx < w && ny >= 0 && ny < h && src[(ny * w + nx) * 4 + 3] >= 20;
+            });
+            if (hasNeighbor) {
+              out.data[i] = or; out.data[i + 1] = og; out.data[i + 2] = ob; out.data[i + 3] = 255;
+            }
+          }
+        }
+      }
+      tctx.putImageData(out, 0, 0);
+      const dest = document.getElementById('paletteOutCanvas');
+      const dctx = dest.getContext('2d');
+      dctx.imageSmoothingEnabled = false;
+      dctx.clearRect(0, 0, dest.width, dest.height);
+      dctx.drawImage(temp, 0, 0, dest.width, dest.height);
+    }
+
+    function downloadCanvas(id, filename) {
+      const a = document.createElement('a');
+      a.href = document.getElementById(id).toDataURL('image/png');
+      a.download = filename;
+      a.click();
+    }
+
+    // Animation loops
+    setInterval(() => {
+      if (document.getElementById('chkOrbit').checked && document.getElementById('normalTab').classList.contains('active')) {
+        orbitAngle += 0.05;
+        lightPos.x = 0.5 + Math.cos(orbitAngle) * 0.36;
+        lightPos.y = 0.5 + Math.sin(orbitAngle) * 0.36;
+        renderLitPreview();
+      }
+    }, 45);
+
+    let lastAnimTick = 0;
+    function tickSpriteAnim(ts) {
+      const fps = parseInt(document.getElementById('rngFps').value, 10) || 10;
+      if (ts - lastAnimTick > 1000 / fps && detectedRects.length > 0) {
+        lastAnimTick = ts;
+        animFrameIdx = (animFrameIdx + 1) % detectedRects.length;
+        const r = detectedRects[animFrameIdx];
+        const ac = document.getElementById('animPreviewCanvas');
+        const actx = ac.getContext('2d');
+        actx.imageSmoothingEnabled = false;
+        actx.clearRect(0, 0, ac.width, ac.height);
+        const scale = Math.min(ac.width / r.w, ac.height / r.h) * 0.8;
+        const dw = r.w * scale, dh = r.h * scale;
+        actx.drawImage(sheetSrc, r.x, r.y, r.w, r.h, (ac.width - dw) / 2, (ac.height - dh) / 2, dw, dh);
+      }
+      requestAnimationFrame(tickSpriteAnim);
+    }
+
+    // Boot defaults
+    loadPresetSprite('sword');
+    buildDemoSpriteSheet();
+    generateSfxBuffer();
+    requestAnimationFrame(tickSpriteAnim);
+  </script>
+</body>
+</html>
