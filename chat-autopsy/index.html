@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>카톡·DM 심리 부검소 & Text Elo — 누가 더 좋아하는지 1초 만에 영수증 판독</title>
-  <meta name="description" content="카카오톡/인스타 DM 대화를 100% 브라우저 내부에서 정밀 분석해 주도권 비율, 호감도 변화, 체스식 블런더(??)와 역전 답장 공식까지 판독합니다." />
+  <title>Texting Elo & 카톡·DM 심리 부검소 — Instant Relationship Power Receipt</title>
+  <meta name="description" content="100% client-side Texting Elo & KakaoTalk/DM psychological power analyzer. Detect ?? Blunders, latency asymmetry, attraction score & high-status reply scripts." />
   <script src="config.js"></script>
   <style>
     :root {
@@ -22,16 +22,14 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", Inter, Segoe UI, sans-serif;
       background: radial-gradient(circle at 50% 0%, #1e1333 0%, var(--bg) 55%);
       color: var(--text);
       min-height: 100vh;
       line-height: 1.55;
     }
     .wrap { max-width: 820px; margin: 0 auto; padding: 22px 16px 70px; }
-    .topbar {
-      display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px;
-    }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; }
     .lang-btn {
       background: var(--card2); color: var(--text); border: 1px solid var(--border);
       padding: 6px 12px; border-radius: 99px; font-size: 12px; font-weight: 700; cursor: pointer;
@@ -42,10 +40,8 @@
       background: rgba(244,63,94,0.15); color: #fb7185; border: 1px solid rgba(244,63,94,0.35); margin-bottom: 10px;
     }
     .hero h1 { font-size: clamp(24px, 5vw, 36px); font-weight: 900; letter-spacing: -0.6px; margin-bottom: 8px; }
-    .hero p { color: var(--muted); font-size: 14px; max-width: 580px; margin: 0 auto; }
-    .trust-bar {
-      margin-top: 12px; font-size: 12px; color: #34d399; font-weight: 700;
-    }
+    .hero p { color: var(--muted); font-size: 14px; max-width: 590px; margin: 0 auto; }
+    .trust-bar { margin-top: 12px; font-size: 12px; color: #34d399; font-weight: 700; }
     .card {
       background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 18px;
       box-shadow: 0 14px 40px rgba(0,0,0,0.45);
@@ -71,11 +67,9 @@
     .sample-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
     .file-drop {
       border: 1.5px dashed #3f4e7a; border-radius: 12px; padding: 14px; text-align: center;
-      cursor: pointer; color: #cbd5e1; font-size: 13px; font-weight: 700; background: rgba(24,30,49,0.5);
+      cursor: pointer; color: #cbd5e1; font-size: 13px; font-weight: 700; background: rgba(24,30,49,0.5); display: block;
     }
     .file-drop:hover { border-color: var(--pink); }
-
-    /* RECEIPT VIEW */
     #resultSection { display: none; }
     .power-meter {
       height: 28px; border-radius: 99px; overflow: hidden; display: flex; margin: 12px 0;
@@ -86,7 +80,7 @@
     .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 10px; margin: 14px 0; }
     .kpi { background: var(--card2); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
     .kpi .k-label { font-size: 11px; color: var(--muted); }
-    .kpi .k-val { font-size: 20px; font-weight: 900; margin-top: 2px; }
+    .kpi .k-val { font-size: 19px; font-weight: 900; margin-top: 2px; }
     .move-item {
       background: #0c101b; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px;
       margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 13px;
@@ -95,13 +89,11 @@
     .tag-blunder { background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.45); }
     .tag-inacc { background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.45); }
     .tag-brilliant { background: rgba(6,182,212,0.2); color: #22d3ee; border: 1px solid rgba(6,182,212,0.45); }
-
-    /* PAYWALL LOCKED PRESCRIPTION */
     .paywall-wrapper { position: relative; overflow: hidden; border-radius: 16px; border: 1.5px solid var(--pink); }
     .blurred-body { filter: blur(7px); user-select: none; pointer-events: none; opacity: 0.55; padding: 20px; }
     .unlocked .blurred-body { filter: none; user-select: auto; pointer-events: auto; opacity: 1; }
     .lock-overlay {
-      position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,14,24,0.35) 0%, rgba(11,14,24,0.95) 48%);
+      position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,14,24,0.3) 0%, rgba(11,14,24,0.96) 45%);
       display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 22px;
     }
     .unlocked .lock-overlay { display: none; }
@@ -114,108 +106,88 @@
 <body>
   <div class="wrap">
     <div class="topbar">
-      <div style="font-weight:900; font-size:15px;">🔬 <span id="brandTitle">카톡·DM 심리 부검소</span> <span style="color:var(--pink);">TEXT ELO</span></div>
-      <button class="lang-btn" onclick="toggleLang()" id="langBtn">🇺🇸 English Mode</button>
+      <div style="font-weight:900; font-size:15px;">♟️ <span id="brandTitle">카톡·DM 심리 부검소</span> <span style="color:var(--pink);">TEXT ELO</span></div>
+      <button class="lang-btn" onclick="switchLang()" id="langBtn">🇺🇸 English</button>
     </div>
 
     <div class="hero">
-      <div class="pill" id="heroPill">🔥 스레드 · 에타 · r/TextingTheory 화제의 관계 권력 영수증</div>
-      <h1 id="heroTitle">"이 사람 나 좋아하는 거 맞을까?"<br/>감 말고 <span style="color:var(--pink);">답장 데이터</span>로 부검하세요</h1>
-      <p id="heroSub">카톡 대화 내보내기(.txt) 또는 인스타 DM/문자 내용을 붙여넣으면 답장 속도 격차, 선톡 비율, ㅋㅋㅋ 감소율, 자폭 블런더(??)까지 1초 만에 판독합니다.</p>
-      <div class="trust-bar" id="trustNote">🔒 100% 내 기기 브라우저 안에서만 계산됩니다 (서버 전송·저장 0바이트)</div>
+      <div class="pill" id="heroPill"></div>
+      <h1 id="heroTitle"></h1>
+      <p id="heroSub"></p>
+      <div class="trust-bar" id="trustNote"></div>
     </div>
 
     <div class="card">
       <label class="file-drop" for="txtFile">
-        📂 <span id="dropLabel">카카오톡 대화 내보내기 (.txt) 파일 선택하기</span>
+        📂 <span id="dropLabel"></span>
         <input type="file" id="txtFile" accept=".txt,text/plain" style="display:none" />
       </label>
 
-      <textarea id="chatInput" placeholder="[카톡 .txt 파일을 올리거나 대화 내용을 그대로 복사해 붙여넣으세요]&#10;예시:&#10;[나] [오후 9:10] 오늘 뭐해? 저녁 먹었어?&#10;[상대] [오후 11:48] 응 방금 먹음ㅋㅋ&#10;[나] [오후 11:49] 오 뭐 먹었어?? 나는 오늘 운동 갔다왔는데 진짜 힘들더라ㅠㅠ"></textarea>
+      <textarea id="chatInput"></textarea>
 
       <div class="sample-row">
-        <span style="font-size:12px; color:var(--muted);" id="sampleHint">테스트 샘플 바로 넣어보기:</span>
-        <button class="btn btn-sub" onclick="loadSample('crush_kr')">💔 읽씹·어장 의심 썸남/썸녀 샘플</button>
-        <button class="btn btn-sub" onclick="loadSample('mutual_kr')">💘 쌍방 호감 시그널 샘플</button>
-        <button class="btn btn-sub" onclick="loadSample('en_ghost')">🇺🇸 English Texting Elo Sample</button>
+        <span style="font-size:12px; color:var(--muted);" id="sampleHint"></span>
+        <button class="btn btn-sub" onclick="loadSample('crush_kr')">🇰🇷 읽씹·어장 의심 샘플</button>
+        <button class="btn btn-sub" onclick="loadSample('en_ghost')">🇺🇸 Breadcrumbing / Ghost Sample</button>
+        <button class="btn btn-sub" onclick="loadSample('en_green')">🇺🇸 High-Interest Sample</button>
       </div>
 
       <div style="display:flex; gap:10px; margin-top:12px; align-items:center;">
-        <span style="font-size:12px; color:var(--muted); white-space:nowrap;" id="myNameLabel">내 대화명(선택):</span>
-        <input type="text" id="myNameInput" placeholder="비워두면 자동 추론합니다" style="flex:1; background:#0a0d16; border:1px solid var(--border); color:#fff; padding:8px 10px; border-radius:8px; font-size:13px;" />
+        <span style="font-size:12px; color:var(--muted); white-space:nowrap;" id="myNameLabel"></span>
+        <input type="text" id="myNameInput" style="flex:1; background:#0a0d16; border:1px solid var(--border); color:#fff; padding:8px 10px; border-radius:8px; font-size:13px;" />
       </div>
 
-      <button class="btn btn-fire" onclick="analyzeChat()" id="btnAnalyze">⚡ 관계 권력 영수증 & 호감도 즉시 부검하기</button>
+      <button class="btn btn-fire" onclick="analyzeChat()" id="btnAnalyze"></button>
     </div>
 
-    <!-- RESULTS -->
     <div id="resultSection">
       <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-          <h2 style="font-size:18px; font-weight:900;" id="verdictHeader">🧾 심리 부검 영수증</h2>
-          <button class="btn btn-sub" onclick="downloadReceiptPng()">📸 공유용 영수증 이미지 저장</button>
+          <h2 style="font-size:18px; font-weight:900;" id="verdictHeader"></h2>
+          <button class="btn btn-sub" onclick="downloadReceiptPng()" id="btnDownloadPng"></button>
         </div>
 
-        <div id="headlineVerdict" style="margin-top:12px; padding:14px; border-radius:12px; background:rgba(244,63,94,0.12); border:1px solid rgba(244,63,94,0.35); font-weight:800; font-size:15px;"></div>
+        <div id="headlineVerdict" style="margin-top:12px; padding:14px; border-radius:12px; background:rgba(244,63,94,0.12); border:1px solid rgba(244,63,94,0.35); font-weight:800; font-size:14.5px;"></div>
 
         <div style="margin-top:14px; font-size:12px; color:var(--muted); display:flex; justify-content:space-between;">
-          <span id="lblMyInvest">내 감정 투자 비중</span>
-          <span id="lblTheirInvest">상대 감정 투자 비중</span>
+          <span id="lblMyInvest"></span>
+          <span id="lblTheirInvest"></span>
         </div>
         <div class="power-meter">
-          <div class="power-me" id="barMe" style="width:74%;">나 74%</div>
-          <div class="power-them" id="barThem">상대 26%</div>
+          <div class="power-me" id="barMe" style="width:74%;">Me 74%</div>
+          <div class="power-them" id="barThem">Them 26%</div>
         </div>
 
         <div class="kpi-grid">
-          <div class="kpi">
-            <div class="k-label">내 Texting Elo 점수</div>
-            <div class="k-val" id="kpiMyElo" style="color:var(--pink);">780</div>
-          </div>
-          <div class="kpi">
-            <div class="k-label">상대 호감도 판정</div>
-            <div class="k-val" id="kpiInterest" style="color:var(--amber);">31% (주의)</div>
-          </div>
-          <div class="kpi">
-            <div class="k-label">답장 속도 격차</div>
-            <div class="k-val" id="kpiLatency">18.4배 손해</div>
-          </div>
-          <div class="kpi">
-            <div class="k-label">적발된 자폭 블런더(??)</div>
-            <div class="k-val" id="kpiBlunders" style="color:#f87171;">4건</div>
-          </div>
+          <div class="kpi"><div class="k-label" id="klElo"></div><div class="k-val" id="kpiMyElo" style="color:var(--pink);"></div></div>
+          <div class="kpi"><div class="k-label" id="klInt"></div><div class="k-val" id="kpiInterest" style="color:var(--amber);"></div></div>
+          <div class="kpi"><div class="k-label" id="klLat"></div><div class="k-val" id="kpiLatency"></div></div>
+          <div class="kpi"><div class="k-label" id="klBlu"></div><div class="k-val" id="kpiBlunders" style="color:#f87171;"></div></div>
         </div>
 
-        <h3 style="font-size:14px; color:var(--cyan); margin:14px 0 8px;">♟️ 결정적 대화 기보 판정 (Texting Theory Engine)</h3>
+        <h3 style="font-size:14px; color:var(--cyan); margin:14px 0 8px;" id="movesHeader"></h3>
         <div id="movesContainer"></div>
         <canvas id="receiptCanvas" width="640" height="520" style="display:none;"></canvas>
       </div>
 
-      <!-- HUMAN PSYCHOLOGY IMPULSE PAYWALL ($0.99) -->
       <div class="paywall-wrapper card" id="paywallCard" style="padding:0;">
         <div class="blurred-body" id="proReportContent">
-          <h3 style="color:var(--emerald); font-size:17px; margin-bottom:10px;">🔓 심층 본심 해독 & 주도권 역전 실전 답장 처방전</h3>
+          <h3 style="color:var(--emerald); font-size:17px; margin-bottom:10px;" id="proHeader"></h3>
           <p id="deepDiagnosis" style="font-size:14px; margin-bottom:14px;"></p>
-
-          <h4 style="color:#f87171; font-size:14px; margin-top:12px;">🚫 지금 절대 보내면 관계 끝나는 금지 행동</h4>
+          <h4 style="color:#f87171; font-size:14px; margin-top:12px;" id="dontHeader"></h4>
           <div class="script-box" id="dontSendBox" style="border-left-color:#ef4444;"></div>
-
-          <h4 style="color:var(--cyan); font-size:14px; margin-top:14px;">💬 그대로 복사해서 보내는 '프레임 역전' 실전 답장 3종</h4>
+          <h4 style="color:var(--cyan); font-size:14px; margin-top:14px;" id="scriptsHeader"></h4>
           <div id="replyScriptsBox"></div>
         </div>
 
         <div class="lock-overlay" id="lockOverlay">
-          <div class="pill">🔒 심층 처방전 & 역전 답장 멘트 잠금됨</div>
-          <h3 style="font-size:20px; font-weight:900; margin-bottom:8px;">지금 잘못 답장하면 주도권 영구 상실됩니다</h3>
-          <p style="font-size:13.5px; color:#cbd5e1; max-width:460px; margin-bottom:16px;">
-            방금 분석된 상대의 답장 패턴 맞춤 <strong>① 숨은 본심 판독(회피형 vs 어장 vs 호감)</strong>, <strong>② 절대 금기 자폭 멘트</strong>, <strong>③ 상대가 먼저 연락 오게 만드는 실전 답장 3종</strong>을 커피 한 모금 값(<strong>$0.99 / 약 1,400원</strong>)에 즉시 확인하세요.
-          </p>
-          <a id="btnPaypalUnlock" href="#" onclick="return startPaypalUnlock(event)" class="btn btn-fire" style="max-width:390px; margin-top:0;">
-            💳 PayPal / 카드로 $0.99 결제 후 즉시 열기
-          </a>
+          <div class="pill" id="lockPill"></div>
+          <h3 style="font-size:20px; font-weight:900; margin-bottom:8px;" id="lockTitle"></h3>
+          <p style="font-size:13.5px; color:#cbd5e1; max-width:480px; margin-bottom:16px;" id="lockDesc"></p>
+          <a id="btnPaypalUnlock" href="#" onclick="return startPaypalUnlock(event)" class="btn btn-fire" style="max-width:410px; margin-top:0;"></a>
           <div style="margin-top:12px; display:flex; gap:6px; align-items:center;">
-            <input type="text" id="inpUnlockCode" placeholder="결제 영수증 코드 입력" style="background:#0a0d16; border:1px solid var(--border); color:#fff; padding:6px 10px; border-radius:8px; font-size:12px; width:150px;" />
-            <button class="btn btn-sub" onclick="verifyCode()">잠금 해제</button>
+            <input type="text" id="inpUnlockCode" placeholder="Unlock code" style="background:#0a0d16; border:1px solid var(--border); color:#fff; padding:6px 10px; border-radius:8px; font-size:12px; width:145px;" />
+            <button class="btn btn-sub" onclick="verifyCode()" id="btnCodeUnlock"></button>
           </div>
         </div>
       </div>
@@ -224,46 +196,125 @@
 
   <script>
     const CFG = window.CHATAUTOPSY_CONFIG || {};
-    let LANG = 'ko';
+    const urlParams = new URLSearchParams(window.location.search);
+    let LANG = urlParams.get('lang') || ((navigator.language || '').toLowerCase().startsWith('ko') ? 'ko' : 'en');
     let LAST_REPORT = null;
 
-    const SAMPLES = {
-      crush_kr: `[민지] [오후 6:12] 오빠 오늘 퇴근했어?? 비 엄청 오는데 우산 챙겼어?
-[준호] [오후 9:45] 어 방금 집 들어옴ㅋㅋ
-[민지] [오후 9:46] 헐 고생했다ㅠㅠ 저녁은 먹었어??
-[민지] [오후 9:47] 나 오늘 회사 앞 새로 생긴 파스타집 갔는데 진짜 맛있더라 담에 같이 가자!!
-[준호] [오후 11:30] 오 좋지ㅋㅋ
-[민지] [오후 11:31] 이번 주 토요일 시간 어때?? 아님 일요일도 괜찮아!
-[준호] [오전 10:15] 주말엔 좀 봐야될듯 일정 나오면 말할게
-[민지] [오전 10:16] 웅웅 알겠어!! 편할 때 알려줘ㅎㅎ 오늘도 화이팅해!!`,
-      mutual_kr: `[지훈] [오후 8:10] 오늘 말했던 전시회 사진 찾아봤는데 분위기 꽤 좋다
-[서연] [오후 8:13] 헐 대박!! 저 여기 인스타 저장해뒀던 곳이에요ㅋㅋㅋ 어떻게 알았어요??
-[지훈] [오후 8:16] 감이 좋지ㅋㅋ 금요일 저녁에 근처에서 밥 먹고 잠깐 들를래요?
-[서연] [오후 8:17] 완전 좋아요!! 저 파스타나 일식 다 좋아해요 지훈씨는 뭐 좋아해요?
-[지훈] [오후 8:20] 근처에 오마카세 괜찮은 데 알아뒀어요 7시쯤 어때요?
-[서연] [오후 8:21] 7시 딱 좋아요ㅎㅎ 벌써 기대돼요!!`,
-      en_ghost: `Me: Hey! Had a great time Friday, did you make it back okay?
-Alex: yeah just got home lol
-Me: Awesome!! Keep thinking about that rooftop bar, the music was crazy good haha
-Me: Also are you free Thursday or Friday next week to grab tacos?
-Alex: idk my schedule is kinda packed rn ill let u know
-Me: No worries at all!! Whenever works for you just text me :)`
+    const I18N = {
+      ko: {
+        brand: '카톡·DM 심리 부검소',
+        langToggle: '🇺🇸 English Mode',
+        pill: '🔥 스레드 · 에타 · r/TextingTheory 화제의 관계 권력 영수증',
+        title: '"이 사람 나 좋아하는 거 맞을까?"<br/>감 말고 <span style="color:var(--pink);">답장 데이터</span>로 부검하세요',
+        sub: '카톡 대화 내보내기(.txt) 또는 인스타 DM/문자 내용을 넣으면 답장 속도 격차, 선톡 비율, 자폭 블런더(??)와 역전 멘트까지 1초 만에 판독합니다.',
+        trust: '🔒 100% 내 기기 브라우저 안에서만 계산됩니다 (외부 서버 전송·저장 0바이트)',
+        drop: '카카오톡 대화 내보내기 (.txt) 파일 올리기 (클릭)',
+        placeholder: '[카톡 .txt 파일을 올리거나 대화 내용을 그대로 붙여넣으세요]\n예시:\n[나] [오후 9:10] 오늘 뭐해? 저녁 먹었어?\n[상대] [오후 11:48] 응 방금 먹음ㅋㅋ',
+        sampleHint: '실전 샘플 바로 테스트:',
+        myName: '내 이름(선택):',
+        myNamePh: '비워두면 자동 추론',
+        analyzeBtn: '⚡ 관계 권력 영수증 & 호감도 즉시 부검하기',
+        verdictHdr: '🧾 심리 부검 영수증',
+        dlPng: '📸 영수증 이미지 저장 (공유용)',
+        myInv: '내 감정·시간 투자 비중',
+        thInv: '상대 감정·시간 투자 비중',
+        klElo: '내 Texting Elo 점수',
+        klInt: '상대 호감도 판정',
+        klLat: '답장 속도 격차',
+        klBlu: '적발된 자폭 블런더(??)',
+        movesHdr: '♟️ 결정적 대화 기보 판정 (Chess Engine)',
+        proHdr: '🔓 심층 본심 해독 & 주도권 역전 실전 답장 처방전',
+        dontHdr: '🚫 지금 절대 보내면 관계 끝나는 금기 멘트',
+        scriptsHdr: '💬 그대로 복사해서 보내는 프레임 역전 답장 3종',
+        lockPill: '🔒 심층 처방전 & 역전 답장 스크립트 잠금됨',
+        lockTitle: '지금 잘못 답장하면 주도권 영구 상실됩니다',
+        lockDesc: '상대 패턴에 맞춘 ① 숨은 본심 판독(회피형 vs 어장 vs 호감), ② 절대 금기 자폭 멘트, ③ 상대가 먼저 연락하게 만드는 실전 답장 3종을 커피 한 모금 값($0.99 / 약 1,400원)에 즉시 확인하세요.',
+        payBtn: '💳 PayPal / 카드로 $0.99 결제 후 즉시 열기',
+        codeBtn: '코드 해제'
+      },
+      en: {
+        brand: 'TextElo Autopsy',
+        langToggle: '🇰🇷 한국어 모드',
+        pill: '♟️ Chess-Engine Texting Analysis & Relationship Power Receipt',
+        title: 'Are They Into You or Breadcrumbing?<br/>Run a <span style="color:var(--pink);">Texting Elo Autopsy</span>',
+        sub: 'Paste any iMessage, WhatsApp, Instagram DM, or Discord chat log to expose response-latency asymmetry, double-text ?? Blunders, Elo ratings, and your exact best next move.',
+        trust: '🔒 100% Client-Side In-Browser Engine — Zero messages ever leave your device',
+        drop: 'Upload Chat Export (.txt) or Paste Below',
+        placeholder: 'Paste your chat log here...\nExample:\nMe: Hey! Had a great time Friday, did you make it back okay?\nAlex: yeah just got home lol\nMe: Awesome!! Are you free Thursday or Friday for drinks?',
+        sampleHint: 'Try live sample:',
+        myName: 'Your Name (opt):',
+        myNamePh: 'Auto-detected if blank',
+        analyzeBtn: '⚡ Calculate Texting Elo & Power Receipt',
+        verdictHdr: '🧾 Forensic Power Receipt',
+        dlPng: '📸 Save Shareable Receipt PNG',
+        myInv: 'Your Emotional Investment',
+        thInv: 'Their Emotional Investment',
+        klElo: 'Your Texting Elo',
+        klInt: 'Their Attraction Signal',
+        klLat: 'Reply Speed Asymmetry',
+        klBlu: 'Detected ?? Blunders',
+        movesHdr: '♟️ Move-by-Move Chess Evaluation',
+        proHdr: '🔓 Hidden Subtext & High-Elo Next-Move Prescription',
+        dontHdr: '🚫 Fatal ?? Blunder You Must Avoid Right Now',
+        scriptsHdr: '💬 3 Copy-Paste High-Status Reply Scripts to Flip the Frame',
+        lockPill: '🔒 Best Next Move & Subtext Decoder Locked',
+        lockTitle: 'One More Low-Elo Text Locks In the Dynamic',
+        lockDesc: 'Unlock your custom ① Avoidant vs. Low-Interest Diagnosis, ② Fatal Double-Text Trap Warning, and ③ 3 Exact Copy-Paste High-Elo Replies to flip attraction momentum instantly for $0.99.',
+        payBtn: '💳 Unlock Full Prescription Instantly — $0.99 (PayPal / Card)',
+        codeBtn: 'Unlock'
+      }
     };
 
-    function toggleLang() {
+    const SAMPLES = {
+      crush_kr: `[민지] [오후 6:12] 오빠 오늘 퇴근했어?? 비 엄청 오는데 우산 챙겼어?\n[준호] [오후 9:45] 어 방금 집 들어옴ㅋㅋ\n[민지] [오후 9:46] 헐 고생했다ㅠㅠ 저녁은 먹었어??\n[민지] [오후 9:47] 나 오늘 회사 앞 새로 생긴 파스타집 갔는데 진짜 맛있더라 담에 같이 가자!!\n[준호] [오후 11:30] 오 좋지ㅋㅋ\n[민지] [오후 11:31] 이번 주 토요일 시간 어때?? 아님 일요일도 괜찮아!\n[준호] [오전 10:15] 주말엔 좀 봐야될듯 일정 나오면 말할게\n[민지] [오전 10:16] 웅웅 알겠어!! 편할 때 알려줘ㅎㅎ`,
+      en_ghost: `Me [6:15 PM]: Hey! Had such a fun time Friday, did you make it home safe?\nAlex [9:52 PM]: yeah just got back lol\nMe [9:53 PM]: Awesome!! Keep thinking about that speakeasy, the vibe was unreal haha\nMe [9:55 PM]: Also are you free Thursday or Friday next week to grab tacos?\nAlex [11:48 PM]: idk my schedule is super packed rn ill let u know\nMe [11:49 PM]: No worries at all!! Whenever works for you just lmk :)`,
+      en_green: `Jordan [7:10 PM]: Just walked past that ramen spot you mentioned and thought of you\nTaylor [7:12 PM]: Wait stop!! Did you go in?? You HAVE to try the spicy miso!\nJordan [7:15 PM]: Saved it so we can go properly. Are you free Thursday around 7:30?\nTaylor [7:16 PM]: Thursday at 7:30 works!! What neighborhood is it in again?`
+    };
+
+    function applyLangUI() {
+      const t = I18N[LANG];
+      document.getElementById('brandTitle').textContent = t.brand;
+      document.getElementById('langBtn').textContent = t.langToggle;
+      document.getElementById('heroPill').textContent = t.pill;
+      document.getElementById('heroTitle').innerHTML = t.title;
+      document.getElementById('heroSub').textContent = t.sub;
+      document.getElementById('trustNote').textContent = t.trust;
+      document.getElementById('dropLabel').textContent = t.drop;
+      document.getElementById('chatInput').placeholder = t.placeholder;
+      document.getElementById('sampleHint').textContent = t.sampleHint;
+      document.getElementById('myNameLabel').textContent = t.myName;
+      document.getElementById('myNameInput').placeholder = t.myNamePh;
+      document.getElementById('btnAnalyze').textContent = t.analyzeBtn;
+      document.getElementById('verdictHeader').textContent = t.verdictHdr;
+      document.getElementById('btnDownloadPng').textContent = t.dlPng;
+      document.getElementById('lblMyInvest').textContent = t.myInv;
+      document.getElementById('lblTheirInvest').textContent = t.thInv;
+      document.getElementById('klElo').textContent = t.klElo;
+      document.getElementById('klInt').textContent = t.klInt;
+      document.getElementById('klLat').textContent = t.klLat;
+      document.getElementById('klBlu').textContent = t.klBlu;
+      document.getElementById('movesHeader').textContent = t.movesHdr;
+      document.getElementById('proHeader').textContent = t.proHdr;
+      document.getElementById('dontHeader').textContent = t.dontHdr;
+      document.getElementById('scriptsHeader').textContent = t.scriptsHdr;
+      document.getElementById('lockPill').textContent = t.lockPill;
+      document.getElementById('lockTitle').textContent = t.lockTitle;
+      document.getElementById('lockDesc').textContent = t.lockDesc;
+      document.getElementById('btnPaypalUnlock').textContent = t.payBtn;
+      document.getElementById('btnCodeUnlock').textContent = t.codeBtn;
+      if (LAST_REPORT) analyzeChat();
+    }
+
+    function switchLang() {
       LANG = LANG === 'ko' ? 'en' : 'ko';
-      document.getElementById('langBtn').textContent = LANG === 'ko' ? '🇺🇸 English Mode' : '🇰🇷 한국어 모드';
-      document.getElementById('heroTitle').innerHTML = LANG === 'ko'
-        ? `"이 사람 나 좋아하는 거 맞을까?"<br/>감 말고 <span style="color:var(--pink);">답장 데이터</span>로 부검하세요`
-        : `Are They Into You or Breadcrumbing?<br/>Run a <span style="color:var(--pink);">Texting Elo Autopsy</span>`;
-      document.getElementById('btnAnalyze').textContent = LANG === 'ko'
-        ? '⚡ 관계 권력 영수증 & 호감도 즉시 부검하기'
-        : '⚡ Calculate Texting Elo & Power Receipt';
+      applyLangUI();
     }
 
     function loadSample(k) {
+      if (k.startsWith('en_')) LANG = 'en'; else LANG = 'ko';
+      applyLangUI();
       document.getElementById('chatInput').value = SAMPLES[k];
-      document.getElementById('myNameInput').value = k === 'crush_kr' ? '민지' : (k === 'mutual_kr' ? '지훈' : 'Me');
+      document.getElementById('myNameInput').value = k === 'crush_kr' ? '민지' : (k === 'en_ghost' ? 'Me' : 'Jordan');
       analyzeChat();
     }
 
@@ -280,11 +331,11 @@ Me: No worries at all!! Whenever works for you just text me :)`
 
     function parseTimeMins(tStr) {
       if (!tStr) return null;
-      const m = tStr.match(/(오전|오후|AM|PM)?\s*(\d{1,2}):(\d{2})/i);
+      const m = tStr.match(/(오전|오후|AM|PM)?\s*(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
       if (!m) return null;
       let hr = parseInt(m[2], 10);
       const mn = parseInt(m[3], 10);
-      const ampm = (m[1] || '').toUpperCase();
+      const ampm = (m[1] || m[4] || '').toUpperCase();
       if ((ampm === '오후' || ampm === 'PM') && hr < 12) hr += 12;
       if ((ampm === '오전' || ampm === 'AM') && hr === 12) hr = 0;
       return hr * 60 + mn;
@@ -294,26 +345,22 @@ Me: No worries at all!! Whenever works for you just text me :)`
       const lines = raw.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
       const msgs = [];
       const rxKakaoBracket = /^\[([^\]]+)\]\s*\[([^\]]+)\]\s*(.+)$/;
+      const rxEnTime = /^([^:\[\]]{1,24})\s*\[([^\]]+)\]\s*:\s*(.+)$/;
       const rxKakaoMobile = /^\d{4}[.\-/년\s]+\d{1,2}[.\-/월\s]+\d{1,2}[^,]*,\s*([^:]+?)\s*:\s*(.+)$/;
       const rxColon = /^([^:\[\]]{1,24})\s*:\s*(.+)$/;
 
       for (const ln of lines) {
         if (ln.startsWith('---') || ln.includes('저장한 날짜')) continue;
-        let m = ln.match(rxKakaoBracket);
-        if (m) {
-          msgs.push({ sender: m[1].trim(), timeMins: parseTimeMins(m[2]), text: m[3].trim() });
-          continue;
-        }
+        let m = ln.match(rxKakaoBracket) || ln.match(rxEnTime);
+        if (m) { msgs.push({ sender: m[1].trim(), timeMins: parseTimeMins(m[2]), text: m[3].trim() }); continue; }
         m = ln.match(rxKakaoMobile);
         if (m) {
-          const tMatch = ln.match(/(오전|오후|AM|PM)?\s*\d{1,2}:\d{2}/i);
+          const tMatch = ln.match(/(오전|오후|AM|PM)?\s*\d{1,2}:\d{2}\s*(AM|PM)?/i);
           msgs.push({ sender: m[1].trim(), timeMins: parseTimeMins(tMatch ? tMatch[0] : ''), text: m[2].trim() });
           continue;
         }
         m = ln.match(rxColon);
-        if (m) {
-          msgs.push({ sender: m[1].trim(), timeMins: null, text: m[2].trim() });
-        }
+        if (m) msgs.push({ sender: m[1].trim(), timeMins: null, text: m[2].trim() });
       }
       return msgs;
     }
@@ -326,7 +373,7 @@ Me: No worries at all!! Whenever works for you just text me :)`
 
       const msgs = parseMessages(raw);
       if (msgs.length < 2) {
-        alert('최소 2줄 이상의 대화([이름] [시간] 내용 또는 이름: 내용)를 입력해 주세요.');
+        alert(LANG === 'ko' ? '최소 2줄 이상의 대화를 입력해 주세요.' : 'Please paste at least 2 chat lines (e.g. Name: message).');
         return;
       }
 
@@ -334,8 +381,8 @@ Me: No worries at all!! Whenever works for you just text me :)`
       msgs.forEach(m => { counts[m.sender] = (counts[m.sender] || 0) + 1; });
       const speakers = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
       const manualMe = document.getElementById('myNameInput').value.trim();
-      const me = (manualMe && speakers.find(s => s.includes(manualMe))) || speakers[0];
-      const them = speakers.find(s => s !== me) || '상대방';
+      const me = (manualMe && speakers.find(s => s.toLowerCase().includes(manualMe.toLowerCase()))) || speakers[0];
+      const them = speakers.find(s => s !== me) || (LANG === 'ko' ? '상대방' : 'Partner');
 
       let myChars = 0, theirChars = 0, myQs = 0, theirQs = 0, myDouble = 0, theirDouble = 0;
       let myDelays = [], theirDelays = [];
@@ -353,44 +400,56 @@ Me: No worries at all!! Whenever works for you just text me :)`
           if (prev.sender === cur.sender) {
             if (isMe) {
               myDouble++;
-              keyMoves.push({ tag: '?? Blunder', cls: 'tag-blunder', text: `"${cur.text.slice(0, 44)}..." — 답장 오기 전 연속 추격톡 전송 (주도권 급락)` });
+              keyMoves.push({
+                tag: '?? Blunder', cls: 'tag-blunder',
+                text: LANG === 'ko'
+                  ? `"${cur.text.slice(0, 42)}..." — 답장 오기 전 연속 추격톡 전송 (프레임 급락)`
+                  : `"${cur.text.slice(0, 42)}..." — Unprompted double-text chase before reply`
+              });
             } else {
               theirDouble++;
-              keyMoves.push({ tag: '!! Green Flag', cls: 'tag-brilliant', text: `상대의 연속 선톡 감지: "${cur.text.slice(0, 42)}..."` });
+              keyMoves.push({
+                tag: '!! Brilliant', cls: 'tag-brilliant',
+                text: LANG === 'ko' ? `상대의 연속 선톡 감지: "${cur.text.slice(0, 40)}..."` : `Partner double-texted enthusiastically: "${cur.text.slice(0, 40)}..."`
+              });
             }
           } else if (prev.timeMins !== null && cur.timeMins !== null) {
             let diff = cur.timeMins - prev.timeMins;
             if (diff < 0) diff += 1440;
-            if (diff <= 720) {
-              if (isMe) myDelays.push(diff); else theirDelays.push(diff);
-            }
+            if (diff <= 720) { if (isMe) myDelays.push(diff); else theirDelays.push(diff); }
             if (isMe && diff <= 2 && (theirDelays[theirDelays.length - 1] || 0) >= 60) {
-              keyMoves.push({ tag: '?! Inaccuracy', cls: 'tag-inacc', text: `상대는 1시간 넘게 읽씹했는데 2분 만에 칼답 ("${cur.text.slice(0, 36)}...")` });
+              keyMoves.push({
+                tag: '?! Inaccuracy', cls: 'tag-inacc',
+                text: LANG === 'ko'
+                  ? `상대는 1시간+ 지연 답장했는데 2분 만에 즉각 칼답 ("${cur.text.slice(0, 34)}...")`
+                  : `Instant 1-min reply right after they left you waiting 1h+ ("${cur.text.slice(0, 34)}...")`
+              });
             }
           }
-          if (!isMe && cur.text.length <= 9 && !cur.text.includes('?') && prev.text.length >= 22) {
-            keyMoves.push({ tag: '🧊 Dry Wall', cls: 'tag-inacc', text: `장문 톡에 대한 상대의 철벽 단답: "${cur.text}"` });
+          if (!isMe && cur.text.length <= 14 && !cur.text.includes('?') && prev.text.length >= 25) {
+            keyMoves.push({
+              tag: '🧊 Dry Wall', cls: 'tag-inacc',
+              text: LANG === 'ko' ? `장문 투자에 대한 상대의 건조한 단답: "${cur.text}"` : `Low-effort dry reply against high investment: "${cur.text}"`
+            });
           }
           if (!isMe && cur.text.includes('?')) {
-            keyMoves.push({ tag: '!! Interest', cls: 'tag-brilliant', text: `상대가 먼저 역질문 투척: "${cur.text.slice(0, 44)}"` });
+            keyMoves.push({
+              tag: '!! Green Flag', cls: 'tag-brilliant',
+              text: LANG === 'ko' ? `상대가 먼저 호기심 역질문 투척: "${cur.text.slice(0, 44)}"` : `Partner actively asked back: "${cur.text.slice(0, 44)}"`
+            });
           }
         }
       }
 
       const avg = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 12;
-      const myAvgWait = Math.max(1, avg(myDelays));
-      const theirAvgWait = Math.max(1, avg(theirDelays));
-      const latencyRatio = theirAvgWait / myAvgWait;
-
+      const latencyRatio = Math.max(1, avg(theirDelays)) / Math.max(1, avg(myDelays));
       const charShare = myChars / Math.max(1, myChars + theirChars);
-      const qPenalty = (myQs + 1) / (theirQs + 1);
       let myInvestPct = Math.round(Math.min(92, Math.max(12, charShare * 55 + Math.min(35, latencyRatio * 5) + myDouble * 6 - theirDouble * 6)));
       let theirInvestPct = 100 - myInvestPct;
-
       let interestScore = Math.round(Math.min(96, Math.max(9,
         55 + (theirQs - myQs) * 9 - (latencyRatio - 1) * 6 + (theirChars / Math.max(1, myChars) - 1) * 18 + theirDouble * 10 - myDouble * 7
       )));
-      let myElo = Math.round(Math.min(2150, Math.max(420, 1250 - myDouble * 140 - Math.max(0, latencyRatio - 2) * 35 + theirQs * 55)));
+      let myElo = Math.round(Math.min(2200, Math.max(420, 1250 - myDouble * 140 - Math.max(0, latencyRatio - 2) * 35 + theirQs * 55)));
       const blunderCount = myDouble + (latencyRatio > 5 ? 2 : 0) + (myQs > theirQs + 2 ? 1 : 0);
 
       LAST_REPORT = { me, them, myInvestPct, theirInvestPct, interestScore, myElo, latencyRatio, blunderCount, theirQs, myQs };
@@ -400,27 +459,35 @@ Me: No worries at all!! Whenever works for you just text me :)`
       document.getElementById('barMe').textContent = `${me} ${myInvestPct}%`;
       document.getElementById('barThem').textContent = `${them} ${theirInvestPct}%`;
 
-      document.getElementById('kpiMyElo').textContent = myElo + (myElo < 950 ? ' (호구 주의)' : (myElo > 1400 ? ' (고수)' : ' (평범)'));
-      document.getElementById('kpiInterest').textContent = `${interestScore}% ` + (interestScore >= 68 ? '🔥 그린라이트' : (interestScore >= 42 ? '⚠️ 애매/관망' : '🚨 어장·회피'));
-      document.getElementById('kpiLatency').textContent = latencyRatio >= 1.4 ? `내가 ${latencyRatio.toFixed(1)}배 더 칼답` : `상대가 ${(1/latencyRatio).toFixed(1)}배 더 칼답`;
-      document.getElementById('kpiBlunders').textContent = `${blunderCount}건`;
+      if (LANG === 'ko') {
+        document.getElementById('kpiMyElo').textContent = myElo + (myElo < 950 ? ' (호구 주의)' : (myElo > 1400 ? ' (고수)' : ' (평범)'));
+        document.getElementById('kpiInterest').textContent = `${interestScore}% ` + (interestScore >= 68 ? '🔥 그린라이트' : (interestScore >= 42 ? '⚠️ 관망' : '🚨 어장·회피'));
+        document.getElementById('kpiLatency').textContent = latencyRatio >= 1.3 ? `내가 ${latencyRatio.toFixed(1)}배 칼답` : `상대가 ${(1/latencyRatio).toFixed(1)}배 칼답`;
+        document.getElementById('kpiBlunders').textContent = `${blunderCount}건`;
+      } else {
+        document.getElementById('kpiMyElo').textContent = myElo + (myElo < 950 ? ' (Chasing)' : (myElo > 1400 ? ' (Grandmaster)' : ' (Solid)'));
+        document.getElementById('kpiInterest').textContent = `${interestScore}% ` + (interestScore >= 68 ? '🔥 High' : (interestScore >= 42 ? '⚠️ Lukewarm' : '🚨 Breadcrumbing'));
+        document.getElementById('kpiLatency').textContent = latencyRatio >= 1.3 ? `${latencyRatio.toFixed(1)}x Over-Eager` : `${(1/latencyRatio).toFixed(1)}x In Your Favor`;
+        document.getElementById('kpiBlunders').textContent = `${blunderCount}`;
+      }
 
       const verdictEl = document.getElementById('headlineVerdict');
-      if (interestScore < 45) {
-        verdictEl.innerHTML = `🚨 <strong>긴급 진단:</strong> 현재 <strong>${me}</strong>님이 대화를 인공호흡기로 살리고 있습니다. 질문 비율(${myQs} : ${theirQs})과 답장 속도 격차를 볼 때, 지금 기존 패턴대로 한 번 더 선톡하면 '확정적 을(乙)'로 굳어집니다.`;
-      } else if (interestScore < 70) {
-        verdictEl.innerHTML = `⚡ <strong>중립 긴장 구간:</strong> 상대(<strong>${them}</strong>)도 호기심은 있으나 안전거리를 유지 중입니다. 다음 1~2번의 답장 텐션 조절이 썸 성패를 결정합니다.`;
+      if (LANG === 'ko') {
+        verdictEl.innerHTML = interestScore < 48
+          ? `🚨 <strong>긴급 진단:</strong> 현재 <strong>${me}</strong>님이 대화를 인공호흡기로 살리고 있습니다(질문 비율 ${myQs}:${theirQs}). 지금 습관대로 한 번만 더 먼저 묻거나 재촉하면 주도권 회복이 불가능해집니다.`
+          : `💘 <strong>호감 신호 포착:</strong> 상대(<strong>${them}</strong>)도 대화에 충분히 반응하고 있습니다. 텐션을 끌지 말고 정확한 타이밍에 약속 프레임을 잡으세요.`;
       } else {
-        verdictEl.innerHTML = `💘 <strong>강력한 쌍방 호감 감지:</strong> 상대(<strong>${them}</strong>)의 역질문과 반응 속도가 매우 적극적입니다! 뜸 들이지 말고 구체적인 약속 날짜를 박아야 할 타이밍입니다.`;
+        verdictEl.innerHTML = interestScore < 48
+          ? `🚨 <strong>Engine Alert:</strong> <strong>${me}</strong> is carrying ${myInvestPct}% of the conversational load (Questions ${myQs}:${theirQs}). Sending one more eager check-in cements a low-attraction dynamic.`
+          : `💘 <strong>Strong Mutual Signal:</strong> <strong>${them}</strong> is actively reciprocating (${theirQs} counter-questions). Lock in concrete plans before momentum cools.`;
       }
 
       const movesHtml = (keyMoves.slice(0, 4).length ? keyMoves.slice(0, 4) : [
-        { tag: '?! Pattern', cls: 'tag-inacc', text: `글자수 투자 비율 ${myChars}자 vs ${theirChars}자 — 감정 노출 속도 조절 필요` }
+        { tag: '?! Balance', cls: 'tag-inacc', text: LANG === 'ko' ? `글자수 투자 ${myChars}자 vs ${theirChars}자` : `Character volume ${myChars} vs ${theirChars}` }
       ]).map(m => `<div class="move-item"><span class="chess-tag ${m.cls}">${m.tag}</span><span style="flex:1; color:#cbd5e1;">${m.text}</span></div>`).join('');
       document.getElementById('movesContainer').innerHTML = movesHtml;
 
       populatePrescription(LAST_REPORT);
-      document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
     }
 
     function populatePrescription(rep) {
@@ -428,47 +495,44 @@ Me: No worries at all!! Whenever works for you just text me :)`
       const dont = document.getElementById('dontSendBox');
       const scripts = document.getElementById('replyScriptsBox');
 
-      if (rep.interestScore < 50) {
-        diag.innerHTML = `<strong>[${rep.them}의 숨은 본심 판독]</strong> 상대는 당신이 '언제든 답장해주는 안전한 선택지'라고 확신해 도파민 긴장감이 꺼진 상태입니다(질문 횟수 ${rep.theirQs}회). 싫어하는 것이 아니라 <strong>추격할 여백을 주지 않아 매력이 반감된 전형적 과투자 패턴</strong>입니다.`;
-        dont.textContent = `❌ 절대 금지: "바빠?", "주말 일정 나왔어?", "나한테 서운한 거 있어?" 같은 확인·재촉형 질문 및 물음표 2개(??) 이상 사용 금지.`;
-        scripts.innerHTML = `
-          <div class="script-box"><strong>1. [미러링 무심 컷 — 가장 강력]</strong><br/>상대의 마지막 단답 이후 최소 <strong>상대 평균 답장시간의 1.5배</strong> 동안 읽지 말고 멈춘 뒤, 질문 없이 짧은 마침표 반응("오 알겠어 편히 쉬어~")으로 대화를 내가 먼저 종료하세요.</div>
-          <div class="script-box"><strong>2. [호기심 훅 재점화 (48시간 뒤)]</strong><br/>"아까 길 가다 [상대와 공유했던 소재] 봤는데 웃기더라ㅋㅋ" — 약속 요구 없이 가벼운 한 줄 툭 던지고 바로 휴대폰 덮기.</div>
-          <div class="script-box"><strong>3. [일정 미루는 상대 프레임 역전 멘트]</strong><br/>"이번 주는 나도 약속이 다 차버려서ㅋㅋ 담주 중에 시간 맞으면 보자!" — 기다리는 사람에서 선택하는 사람으로 포지션 즉시 전환.</div>
-        `;
+      if (LANG === 'ko') {
+        if (rep.interestScore < 50) {
+          diag.innerHTML = `<strong>[${rep.them}의 숨은 본심]</strong> 상대는 당신을 '언제든 답장해주는 안전한 선택지'로 인식해 긴장감이 꺼진 상태입니다. 매력이 없어서가 아니라 여백 없이 추격해 도파민이 차단된 전형적 과투자 구간입니다.`;
+          dont.textContent = `❌ 절대 금지: "바빠?", "주말 일정 나왔어?", "나한테 서운한 거 있어?" 등 확인·재촉형 질문 금지.`;
+          scripts.innerHTML = `<div class="script-box"><strong>1. [미러링 무심 컷]</strong> 상대 평균 답장시간의 1.5배 이상 간격을 둔 뒤 질문 없이 짧은 긍정("오 알겠어 편히 쉬어~")으로 먼저 대화를 끊으세요.</div><div class="script-box"><strong>2. [무압박 콜백 훅 (3~4일 뒤)]</strong> 약속 요구 없이 둘만 아는 가벼운 사진/한 줄("지나가다 이거 봤는데 웃기더라ㅋㅋ")만 던지고 즉시 종료.</div><div class="script-box"><strong>3. [일정 보류 대처 역전 멘트]</strong> "이번 주는 나도 약속이 다 차버려서ㅋㅋ 담주 시간 맞으면 보자!"</div>`;
+        } else {
+          diag.innerHTML = `<strong>[${rep.them}의 숨은 본심]</strong> 상대는 이미 그린라이트를 켜두고 당신이 구체적인 리드를 해주길 기다리고 있습니다.`;
+          dont.textContent = `❌ 절대 금지: "언제 시간 돼?"처럼 결정 부담을 떠넘기는 모호한 질문.`;
+          scripts.innerHTML = `<div class="script-box"><strong>1. [A/B 데이트 확정]</strong> "금요일 저녁이랑 토요일 점심 중 언제가 더 편해요? 맛있는 곳 알아뒀어요ㅎㅎ"</div><div class="script-box"><strong>2. [호감 텐션 상승]</strong> "대화할수록 결이 잘 맞네요ㅋㅋ 실제로 보면 시간 순삭일 듯!"</div><div class="script-box"><strong>3. [여운 남기는 클로징]</strong> 대화가 가장 즐거울 때 "내일 일찍 일정 있어서 먼저 자볼게요! 내일 봐요 :)"</div>`;
+        }
       } else {
-        diag.innerHTML = `<strong>[${rep.them}의 숨은 본심 판독]</strong> 상대는 이미 호감 신호를 충분히 보내고 있으며(${rep.theirQs}회 역질문), 당신이 리드해서 명분을 만들어주기를 기다리는 상태입니다.`;
-        dont.textContent = `❌ 절대 금지: "언제 시간 괜찮으세요?"처럼 막연하게 공을 떠넘기는 질문(결정 피로 유발).`;
-        scripts.innerHTML = `
-          <div class="script-box"><strong>1. [A/B 양자택일 데이트 확정 공식]</strong><br/>"금요일 저녁이랑 토요일 점심 중에 언제가 더 편해요? 맛있는 데 알아뒀어요ㅎㅎ"</div>
-          <div class="script-box"><strong>2. [가벼운 칭찬 + 스킨십/분위기 예고]</strong><br/>"말할수록 은근 결이 잘 맞네요ㅋㅋ 만나면 얘기 한참 할 듯!"</div>
-          <div class="script-box"><strong>3. [연락 텐션 유지 클로징]</strong><br/>밤 11시 반쯤 대화가 가장 재밌을 때 "내일 일찍 일어나야 해서 먼저 자볼게요! 내일 봐요 :)"로 여운 남기기.</div>
-        `;
+        if (rep.interestScore < 50) {
+          diag.innerHTML = `<strong>[Hidden Subtext of ${rep.them}]</strong> Right now ${rep.them} experiences zero uncertainty—your rapid replies and question volume (${rep.myQs} vs ${rep.theirQs}) removed the space needed for curiosity to build.`;
+          dont.textContent = `❌ Fatal Blunder: Do NOT send "hey stranger", "still down for this week?", or double-question marks (??).`;
+          scripts.innerHTML = `<div class="script-box"><strong>1. [The High-Status Mirror Close]</strong> Wait 1.5x their last reply time, then end the thread cleanly with zero questions: "Gotcha, have a good week!" Let silence create tension.</div><div class="script-box"><strong>2. [Zero-Pressure Callback (72h later)]</strong> Drop a playful observation tied to an inside joke with zero ask attached: "Walked past [callback] and laughed, elite tier."</div><div class="script-box"><strong>3. [Flipping "I'll let you know"]</strong> "All good, my week actually just filled up too—let's catch up next week if schedules line up!"</div>`;
+        } else {
+          diag.innerHTML = `<strong>[Hidden Subtext of ${rep.them}]</strong> High buying temperature detected—they are actively investing and waiting for decisive leadership.`;
+          dont.textContent = `❌ Avoid vague "whenever works for you!" passivity—it kills momentum.`;
+          scripts.innerHTML = `<div class="script-box"><strong>1. [The A/B Date Lock]</strong> "Let's do Thursday at 7:30 or Saturday afternoon—which works better for you?"</div><div class="script-box"><strong>2. [Playful Frame]</strong> "Okay solid answer, you officially passed the vibe check. Drinks are on you first round."</div><div class="script-box"><strong>3. [Peak-Exit Close]</strong> Exit on a high note: "Gotta crash early tonight, talk tomorrow :)"</div>`;
+        }
       }
     }
 
     function startPaypalUnlock(e) {
       e.preventDefault();
       const amount = CFG.priceUsd || '0.99';
-      const returnUrl = window.location.origin + window.location.pathname + '?paid=1';
+      const returnUrl = window.location.origin + window.location.pathname + '?paid=1&lang=' + LANG;
       if (CFG.paypalBusinessEmail) {
-        const pp = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${encodeURIComponent(CFG.paypalBusinessEmail)}&item_name=${encodeURIComponent('ChatAutopsy Full Psychological Prescription')}&amount=${amount}&currency_code=USD&no_shipping=1&return=${encodeURIComponent(returnUrl)}`;
-        window.location.href = pp;
-      } else if (CFG.paypalMeUrl) {
-        window.open(CFG.paypalMeUrl, '_blank');
-      } else {
-        alert('판매자 PayPal 이메일 또는 PayPal.me 주소가 설정되면 즉시 $0.99 자동 결제로 연결됩니다.');
+        const item = LANG === 'ko' ? 'ChatAutopsy 심층 심리 처방전 & 역전 멘트' : 'TextElo Full Subtext & High-Elo Reply Prescription';
+        window.location.href = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${encodeURIComponent(CFG.paypalBusinessEmail)}&item_name=${encodeURIComponent(item)}&amount=${amount}&currency_code=USD&no_shipping=1&return=${encodeURIComponent(returnUrl)}`;
       }
       return false;
     }
 
     function verifyCode() {
       const v = document.getElementById('inpUnlockCode').value.trim().toUpperCase();
-      if (v === (CFG.unlockCode || 'FLIP77')) {
-        unlockReport();
-      } else {
-        alert('유효하지 않은 코드입니다.');
-      }
+      if (v === (CFG.unlockCode || 'FLIP77')) unlockReport();
+      else alert(LANG === 'ko' ? '코드가 올바르지 않습니다.' : 'Invalid unlock code.');
     }
 
     function unlockReport() {
@@ -488,20 +552,33 @@ Me: No worries at all!! Whenever works for you just text me :)`
 
       ctx.fillStyle = '#f43f5e';
       ctx.font = 'bold 26px sans-serif';
-      ctx.fillText('🧾 카톡·DM 관계 권력 부검 영수증', 42, 68);
+      ctx.fillText(LANG === 'ko' ? '🧾 카톡·DM 관계 권력 부검 영수증' : '♟️ TEXTING ELO POWER RECEIPT', 42, 68);
 
       ctx.fillStyle = '#94a3b8';
       ctx.font = '16px sans-serif';
-      ctx.fillText(`분석 대상: ${LAST_REPORT.me} vs ${LAST_REPORT.them}`, 42, 104);
+      ctx.fillText(`${LAST_REPORT.me}  vs  ${LAST_REPORT.them}`, 42, 104);
 
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 34px sans-serif';
-      ctx.fillText(`상대 호감도: ${LAST_REPORT.interestScore}%   |   내 Elo: ${LAST_REPORT.myElo}`, 42, 168);
+      ctx.font = 'bold 32px sans-serif';
+      ctx.fillText(
+        LANG === 'ko'
+          ? `상대 호감도: ${LAST_REPORT.interestScore}%  |  내 Elo: ${LAST_REPORT.myElo}`
+          : `Attraction: ${LAST_REPORT.interestScore}%  |  Text Elo: ${LAST_REPORT.myElo}`,
+        42, 168
+      );
 
       ctx.fillStyle = '#fbbf24';
-      ctx.font = 'bold 22px sans-serif';
-      ctx.fillText(`감정 투자 비율: 나 ${LAST_REPORT.myInvestPct}%  vs  상대 ${LAST_REPORT.theirInvestPct}%`, 42, 224);
-      ctx.fillText(`적발된 자폭 블런더(??): ${LAST_REPORT.blunderCount}건`, 42, 266);
+      ctx.font = 'bold 21px sans-serif';
+      ctx.fillText(
+        LANG === 'ko'
+          ? `감정 투자 비율: 나 ${LAST_REPORT.myInvestPct}% vs 상대 ${LAST_REPORT.theirInvestPct}%`
+          : `Investment Split: You ${LAST_REPORT.myInvestPct}% vs Them ${LAST_REPORT.theirInvestPct}%`,
+        42, 224
+      );
+      ctx.fillText(
+        LANG === 'ko' ? `적발된 자폭 블런더(??): ${LAST_REPORT.blunderCount}건` : `Detected ?? Blunders: ${LAST_REPORT.blunderCount}`,
+        42, 266
+      );
 
       ctx.fillStyle = '#1e293b';
       ctx.fillRect(42, 305, 556, 34);
@@ -510,16 +587,16 @@ Me: No worries at all!! Whenever works for you just text me :)`
 
       ctx.fillStyle = '#38bdf8';
       ctx.font = 'bold 17px sans-serif';
-      ctx.fillText('내 카톡방도 무료로 부검해보기 👉 ' + window.location.host + window.location.pathname, 42, 465);
+      ctx.fillText((LANG === 'ko' ? '무료 판독 👉 ' : 'Test yours 👉 ') + 'choikim0108.github.io/text-elo-lab', 42, 465);
 
       const a = document.createElement('a');
       a.href = c.toDataURL('image/png');
-      a.download = 'chat_power_receipt.png';
+      a.download = 'text_elo_receipt.png';
       a.click();
     }
 
-    // Restore on return from PayPal ?paid=1
     window.addEventListener('DOMContentLoaded', () => {
+      applyLangUI();
       const savedRaw = sessionStorage.getItem('chatautopsy_last_raw');
       const savedMe = sessionStorage.getItem('chatautopsy_last_me');
       if (savedRaw) {
